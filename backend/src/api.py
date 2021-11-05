@@ -17,7 +17,7 @@ CORS(app)
 !! NOTE THIS MUST BE UNCOMMENTED ON FIRST RUN
 !! Running this funciton will add one
 '''
-# db_drop_and_create_all()
+db_drop_and_create_all()
 
 # ROUTES
 '''
@@ -88,7 +88,7 @@ def create_drinks(jwt):
     new_title = body.get("title", None)
     new_recipe = body.get("recipe", None)
 
-    if (new_title is None) or (new_recipe is None):
+    if (new_title is None) and (new_recipe is None):
         abort(400)
     try:
         new_drink = Drink(title=new_title, recipe=json.dumps(new_recipe))
@@ -124,14 +124,17 @@ def update_drink_by_id(jwt, id):
     body = request.get_json()
     new_title = body.get("title", None)
     new_recipe = body.get("recipe", None)
-    if (new_title is None) or (new_recipe is None):
+
+    if (new_title is None) and (new_recipe is None):
         abort(400)
 
     try:
-        drink.title = new_title
-        drink.recipe = json.dumps(new_recipe)
+        if new_title:
+            drink.title = new_title
+        if new_recipe:
+            drink.recipe = json.dumps(new_recipe)
         drink.update()
-        formatted_drink = drink.long()
+        formatted_drink = [drink.long()]
         return jsonify({
             'success': True,
             'status': 200,
